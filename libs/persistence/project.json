@@ -1,0 +1,20 @@
+{
+  "name": "persistence",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/persistence/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:infra"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/persistence",
+        "tsConfig": "libs/persistence/tsconfig.lib.json",
+        "packageJson": "libs/persistence/package.json",
+        "main": "libs/persistence/src/index.ts",
+        "assets": ["libs/persistence/*.md"]
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+node_modules
+dist
+tmp
+.nx
+.git
+.github
+coverage
+**/*.spec.ts

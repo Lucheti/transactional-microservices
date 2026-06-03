@@ -1,0 +1,88 @@
+name: beta
+
+services:
+  nats:
+    image: nats:2.10-alpine
+    container_name: beta-nats
+    command: ['-js', '-m', '8222']
+    ports:
+      - '4222:4222'
+      - '8222:8222'
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:8222/healthz']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: beta-redis
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: beta-postgres
+    environment:
+      POSTGRES_USER: beta
+      POSTGRES_PASSWORD: beta
+      # Bootstrap database; per-service DBs are created by init.sql.
+      POSTGRES_DB: beta
+    ports:
+      - '5432:5432'
+    volumes:
+      - beta-pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U beta -d beta']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Saga host. Idles until a saga module is added (docs/playbooks/add-a-saga.md).
+  orchestrator:
+    build:
+      context: .
+      args:
+        APP_NAME: orchestrator
+    container_name: beta-orchestrator
+    environment:
+      NATS_SERVERS: nats://nats:4222
+      DB_HOST: postgres
+      DB_PORT: '5432'
+      DB_USERNAME: beta
+      DB_PASSWORD: beta
+      SAGA_DB_NAME: beta_saga
+      DB_SYNCHRONIZE: 'true'
+    depends_on:
+      nats: { condition: service_healthy }
+      postgres: { condition: service_healthy }
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: .
+      args:
+        APP_NAME: api-gateway
+    container_name: beta-api-gateway
+    environment:
+      PORT: '3000'
+      NATS_SERVERS: nats://nats:4222
+      JWT_SECRET: docker-dev-secret-change-me
+      JWT_EXPIRES_IN: 1h
+      DEV_TOKEN_ENDPOINT_ENABLED: 'true'
+      NATS_REQUEST_TIMEOUT_MS: '5000'
+    ports:
+      - '3000:3000'
+    depends_on:
+      nats: { condition: service_healthy }
+      orchestrator: { condition: service_started }
+    restart: unless-stopped
+
+volumes:
+  beta-pgdata:

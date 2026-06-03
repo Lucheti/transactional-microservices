@@ -13,7 +13,14 @@
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "paths": {}
+    "paths": {
+      "@beta/core": ["./libs/core/src/index.ts"],
+      "@beta/contracts": ["./libs/contracts/src/index.ts"],
+      "@beta/nats": ["./libs/nats/src/index.ts"],
+      "@beta/cache": ["./libs/cache/src/index.ts"],
+      "@beta/persistence": ["./libs/persistence/src/index.ts"],
+      "@beta/saga": ["./libs/saga/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

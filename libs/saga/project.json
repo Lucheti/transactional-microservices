@@ -1,0 +1,20 @@
+{
+  "name": "saga",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/saga/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:saga"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/saga",
+        "tsConfig": "libs/saga/tsconfig.lib.json",
+        "packageJson": "libs/saga/package.json",
+        "main": "libs/saga/src/index.ts",
+        "assets": ["libs/saga/*.md"]
+      }
+    }
+  }
+}

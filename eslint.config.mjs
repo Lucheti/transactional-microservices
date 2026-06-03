@@ -16,10 +16,15 @@ export default [
           enforceBuildableLibDependency: true,
           allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$'],
           depConstraints: [
-            {
-              sourceTag: '*',
-              onlyDependOnLibsWithTags: ['*'],
-            },
+            // Architecture DAG: inner layers must not depend on outer ones.
+            { sourceTag: 'type:core', onlyDependOnLibsWithTags: [] },
+            { sourceTag: 'type:contracts', onlyDependOnLibsWithTags: ['type:core'] },
+            { sourceTag: 'type:transport', onlyDependOnLibsWithTags: ['type:core', 'type:contracts'] },
+            { sourceTag: 'type:infra', onlyDependOnLibsWithTags: ['type:core', 'type:infra'] },
+            { sourceTag: 'type:saga', onlyDependOnLibsWithTags: ['type:core', 'type:infra'] },
+            { sourceTag: 'type:app', onlyDependOnLibsWithTags: ['*'] },
+            // Catch-all so untagged projects (gateway/e2e) stay permitted.
+            { sourceTag: '*', onlyDependOnLibsWithTags: ['*'] },
           ],
         },
       ],
